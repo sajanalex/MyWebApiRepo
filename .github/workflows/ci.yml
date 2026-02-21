@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source
+    - name: Checkout
       uses: actions/checkout@v4
 
     - name: Setup .NET
@@ -26,11 +26,13 @@ jobs:
     - name: Test
       run: dotnet test MyWebApiRepo.sln --no-build --verbosity normal
 
-    - name: Publish Web API
-      run: dotnet publish src/MyWebApi/MyWebApi.csproj -c Release -o publish
+    # ✅ Publish PROJECT (not solution)
+    - name: Publish
+      run: dotnet publish src/MyWebApi/MyWebApi.csproj --configuration Release --output ./publish
 
+    # ✅ Upload correct folder
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: mywebapi
-        path: publish/
+        path: ./publish
