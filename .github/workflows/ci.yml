@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout source
+      uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -20,12 +21,12 @@ jobs:
       run: dotnet restore MyWebApiRepo.sln
 
     - name: Build
-      run: dotnet build MyWebApiRepo.sln --no-restore
+      run: dotnet build MyWebApiRepo.sln --configuration Release --no-restore
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
-      
-    - name: Publish
+      run: dotnet test MyWebApiRepo.sln --no-build --verbosity normal
+
+    - name: Publish Web API
       run: dotnet publish src/MyWebApi/MyWebApi.csproj -c Release -o publish
 
     - name: Upload artifact
