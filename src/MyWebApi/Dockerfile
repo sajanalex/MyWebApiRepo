@@ -1,5 +1,5 @@
-# Use the official .NET SDK image for building the application
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Use the .NET 9.0 SDK image (preview or nightly build)
+FROM mcr.microsoft.com/dotnet/nightly/sdk:9.0 AS build
 WORKDIR /app
 
 # Copy the project file explicitly
@@ -10,8 +10,8 @@ RUN dotnet restore
 COPY . ./
 RUN dotnet publish -c Release -o out
 
-# Use the official .NET runtime image for running the application
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Use the .NET 9.0 runtime image (preview or nightly build)
+FROM mcr.microsoft.com/dotnet/nightly/aspnet:9.0 AS runtime
 WORKDIR /app
 
 # Copy the published output from the build stage
