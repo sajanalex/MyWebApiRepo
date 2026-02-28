@@ -7,6 +7,14 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/mywebapi
+  IMAGE_TAG: ${{ github.sha }}
+
 jobs:
 
   build-and-deploy:
@@ -24,7 +32,29 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build the Docker image
-      run: docker build ./src/MyWebApi --file ./src/MyWebApi/Dockerfile --tag ghcr.io/${{ github.repository_owner }}/mywebapi:latest
+      run: docker build ./src/MyWebApi --file ./src/MyWebApi/Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG --tag $IMAGE_NAME:latest
 
     - name: Push the Docker image to GHCR
-      run: docker push ghcr.io/${{ github.repository_owner }}/mywebapi:latest
+      if: github.event_name != 'pull_request'
+      run: |
+        docker push $IMAGE_NAME:$IMAGE_TAG
+        docker push $IMAGE_NAME:latest
+
+    - name: Azure Login
+      if: github.event_name != 'pull_request'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy container to Azure Web App
+      if: github.event_name != 'pull_request'
+      uses: azure/CLI@v2
+      with:
+        inlineScript: |
+          az webapp config container set \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --container-image-name $IMAGE_NAME:$IMAGE_TAG \
+            --container-registry-url https://ghcr.io \
+            --container-registry-user ${{ secrets.GHCR_USERNAME }} \
+            --container-registry-password ${{ secrets.GHCR_PAT }}
