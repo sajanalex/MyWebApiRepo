@@ -20,7 +20,7 @@
 name: Build and deploy ASP.Net Core app to Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: github-actions-workflow
+  AZURE_WEBAPP_NAME: github-actions-workflow-d
   DOTNET_VERSION: '8.0.x'
 
 on:
